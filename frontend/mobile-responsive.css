@@ -194,17 +194,17 @@
 
     .route-path {
         max-height: 150px;
-
-            /* Hide keyboard-related UI on mobile (no physical keyboard on phones) */
-            #keyboard-hint {
-                display: none !important;
-            }
-
-            .corridor-hotkeys {
-                display: none !important;
-            }
         overflow-y: auto;
         font-size: 12px;
+    }
+
+    /* Hide keyboard-related UI on mobile (no physical keyboard on phones) */
+    #keyboard-hint {
+        display: none !important;
+    }
+
+    .corridor-hotkeys {
+        display: none !important;
     }
 
     .traffic-legend {

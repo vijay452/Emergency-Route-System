@@ -289,18 +289,25 @@ function closeAllPanels() {
 
 // Show keyboard hint on load
 document.addEventListener('DOMContentLoaded', () => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2)
+        || window.matchMedia('(max-width: 768px)').matches;
+
+    if (isMobile) {
+        const existingHint = document.getElementById('keyboard-hint');
+        if (existingHint) {
+            existingHint.remove();
+        }
+    }
+
     setTimeout(() => {
         let hint = document.getElementById('keyboard-hint');
         if (!hint) {
-                    // Skip showing keyboard hint on mobile/touch devices
-                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-                                   || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2)
-                                   || window.matchMedia('(max-width: 768px)').matches;
-        
-                    if (isMobile) {
-                        return; // Don't show keyboard shortcuts on mobile
-                    }
-        
+            // Skip showing keyboard hint on mobile/touch devices
+            if (isMobile) {
+                return;
+            }
+
             hint = document.createElement('div');
             hint.id = 'keyboard-hint';
             hint.style.cssText = `
