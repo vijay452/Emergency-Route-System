@@ -1,0 +1,20 @@
+{
+  "name": "emergency-route-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unified dev runner for Emergency Route System",
+  "scripts": {
+    "predev": "node scripts/kill-ports.js",
+    "dev": "concurrently -n BACKEND,FRONTEND -c green,cyan \"npm --prefix backend run start\" \"python -m http.server 8000 --directory frontend\"",
+    "predev:cpp": "node scripts/kill-ports.js",
+    "build:cpp:backend": "node scripts/build-cpp-backend.js",
+    "run:cpp:backend": "node scripts/run-cpp-backend.js",
+    "dev:cpp": "concurrently -n CPP_BACKEND,FRONTEND -c yellow,cyan \"npm run build:cpp:backend && npm run run:cpp:backend\" \"python -m http.server 8000 --directory frontend\"",
+    "dev:backend": "npm --prefix backend run start",
+    "dev:frontend": "python -m http.server 8000 --directory frontend",
+    "install:all": "npm --prefix backend install && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

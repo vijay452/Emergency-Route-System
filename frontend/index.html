@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1f73e8">    <meta name="referrer" content="origin-when-cross-origin" />    <title>Emergency Route System - Real-time Route Optimization</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="advanced.css">
+    <link rel="stylesheet" href="mobile-responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header/Navbar -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <i class="fas fa-ambulance"></i>
+                <span>Emergency Route Optimizer</span>
+            </div>
+            <div class="navbar-menu">
+                <a href="#" class="nav-link" data-panel="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="#" class="nav-link" data-panel="history"><i class="fas fa-history"></i> History</a>
+                <a href="#" class="nav-link" data-panel="settings"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#" class="nav-link" onclick="showFleetDashboard(event)"><i class="fas fa-sitemap"></i> Fleet</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <!-- Sidebar - Search and Controls -->
+            <div class="sidebar">
+                <div class="search-section">
+                    <h3>Find Emergency Route</h3>
+                    
+                    <div class="input-group">
+                        <label for="location-from">From:</label>
+                        <input id="location-from" class="location-select" list="dehradun-places" placeholder="e.g. ISBT Dehradun">
+                        <div class="help-text">Enter any place in Dehradun/Clement Town</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="location-to">To:</label>
+                        <input id="location-to" class="location-select" list="dehradun-places" placeholder="e.g. Clock Tower Dehradun">
+                        <div class="help-text">Destination location</div>
+                    </div>
+
+                    <div class="map-pick-actions">
+                        <button id="pick-source-map-btn" type="button" class="btn btn-secondary map-action-btn">
+                            <i class="fas fa-map-pin"></i> Pick Source On Map
+                        </button>
+                        <button id="pick-destination-map-btn" type="button" class="btn btn-secondary map-action-btn">
+                            <i class="fas fa-flag-checkered"></i> Pick Destination On Map
+                        </button>
+                        <button id="use-my-location-btn" type="button" class="btn btn-secondary map-action-btn">
+                            <i class="fas fa-location-dot"></i> Use My Live Location As Source
+                        </button>
+                        <button id="show-my-location-btn" type="button" class="btn btn-secondary map-action-btn">
+                            <i class="fas fa-satellite-dish"></i> Show My Live Location On Map
+                        </button>
+                    </div>
+                    <div id="map-pick-status" class="map-pick-status">Tip: Click "Pick Source On Map" or "Pick Destination On Map", then click any point on the map.</div>
+
+                    <datalist id="dehradun-places">
+                        <option value="ISBT Dehradun"></option>
+                        <option value="Clock Tower Dehradun"></option>
+                        <option value="Clement Town"></option>
+                        <option value="Graphic Era University Clement Town"></option>
+                        <option value="Forest Research Institute Dehradun"></option>
+                        <option value="Prem Nagar Dehradun"></option>
+                        <option value="Railway Station Dehradun"></option>
+                    </datalist>
+
+                    <div class="input-group">
+                        <label for="emergency-type">Emergency Type:</label>
+                        <select id="emergency-type" class="location-select">
+                            <option value="ambulance">Ambulance (Medical)</option>
+                            <option value="fire">Fire Department</option>
+                            <option value="police">Police</option>
+                        </select>
+                    </div>
+
+                    <button id="find-route-btn" class="btn btn-primary">
+                        <i class="fas fa-map-marker-alt"></i> Find Route
+                    </button>
+                    <button id="clear-route-btn" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Clear
+                    </button>
+                </div>
+
+                <!-- Traffic Info -->
+                <div class="traffic-section">
+                    <h3>🚨 Traffic Alerts</h3>
+                    <div id="traffic-data-mode" class="traffic-data-mode mode-estimated">Mode: Estimated</div>
+                    <div id="traffic-alerts" class="alerts-container">
+                        <div class="alert-empty">No current alerts</div>
+                    </div>
+                </div>
+
+                <!-- Route Results -->
+                <div class="results-section" id="results-section" style="display: none;">
+                    <h3>Route Details</h3>
+                    <div id="route-results" class="route-details">
+                        <div class="result-item">
+                            <span class="label">Distance:</span>
+                            <span class="value" id="distance">-- km</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Est. Time:</span>
+                            <span class="value" id="time">-- min</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Status:</span>
+                            <span class="value status-badge" id="status">Calculating...</span>
+                        </div>
+                        <div class="result-item result-item-stack">
+                            <span class="label">Alternatives:</span>
+                            <div id="route-alternatives" class="alternatives-list"></div>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Route:</span>
+                            <div class="route-path" id="route-path"></div>
+                        </div>
+                        <div class="result-item result-item-stack emergency-control-panel">
+                            <span class="label">Emergency Signal Control:</span>
+                            <div class="corridor-controls">
+                                <label class="corridor-toggle-label">
+                                    <input type="checkbox" id="green-corridor-toggle" checked>
+                                    Enable Green Corridor Mode
+                                </label>
+                                <div class="corridor-key" id="corridor-key">
+                                    <div class="corridor-key-title">Traffic Light Key</div>
+                                    <div class="corridor-key-row"><span class="key-dot key-red"></span> Red: Congested junction, high priority override</div>
+                                    <div class="corridor-key-row"><span class="key-dot key-yellow"></span> Yellow: Planned override pending apply</div>
+                                    <div class="corridor-key-row"><span class="key-dot key-green"></span> Green: Override active for emergency vehicle</div>
+                                </div>
+                                <button id="optimize-corridor-btn" type="button" class="btn btn-secondary corridor-opt-btn">
+                                    <i class="fas fa-traffic-light"></i> Optimize Signals For Current Route
+                                </button>
+                                <button id="apply-corridor-btn" type="button" class="btn btn-primary corridor-opt-btn">
+                                    <i class="fas fa-bolt"></i> Apply All Signal Overrides
+                                </button>
+                                <button id="release-corridor-btn" type="button" class="btn btn-secondary corridor-opt-btn">
+                                    <i class="fas fa-undo"></i> Release Corridor (Normal Signals)
+                                </button>
+                                <div class="corridor-hotkeys">Hotkeys: <strong>G</strong> optimize, <strong>A</strong> apply, <strong>R</strong> release, <strong>L</strong> toggle mode</div>
+                            </div>
+                            <div id="corridor-status" class="corridor-status">Green corridor ready. Compute a route to generate traffic-light actions.</div>
+                            <div id="signal-plan-list" class="signal-plan-list"></div>
+                        </div>
+
+                        <!-- Live Tracking Section -->
+                        <div class="result-item result-item-stack" style="background: linear-gradient(135deg, rgba(31, 115, 232, 0.1) 0%, rgba(21, 101, 192, 0.05) 100%); padding: 16px; border: 2px solid rgba(31, 115, 232, 0.3); border-radius: 10px; margin-top: 16px;">
+                            <span class="label" style="color: #1f73e8; font-weight: 700; margin-bottom: 12px;">🚗 Live Route Tracking</span>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <button onclick="startLiveTrackingFromRoute()" class="btn btn-primary" style="font-size: 14px; padding: 12px; border-radius: 8px; font-weight: 600;">
+                                    <i class="fas fa-play-circle"></i> Start Live Tracking
+                                </button>
+                                <button onclick="stopLiveTracking()" class="btn btn-secondary" style="font-size: 14px; padding: 12px; border-radius: 8px; font-weight: 600;">
+                                    <i class="fas fa-stop-circle"></i> Stop Tracking
+                                </button>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 12px; color: #666; line-height: 1.5; background: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 6px;">
+                                <strong>📍 Features:</strong>
+                                <ul style="margin: 8px 0; padding-left: 20px;">
+                                    <li>Real-time GPS location tracking (if available)</li>
+                                    <li>Simulated tracking along the route (fallback)</li>
+                                    <li>Live traffic condition updates</li>
+                                    <li>Distance & time remaining to destination</li>
+                                    <li>Traffic alerts for congested areas ahead</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loader -->
+                <div class="loader" id="loader" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Calculating optimal route...</p>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <button id="zoom-in" class="map-btn" title="Zoom In">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="zoom-out" class="map-btn" title="Zoom Out">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button id="center-map" class="map-btn" title="Center Map">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="runtime-config.js"></script>
+    <script src="app.js"></script>
+    <script src="map.js"></script>
+    <script src="panels.js"></script>
+    <script src="advanced.js"></script>
+    <script src="advanced-features.js"></script>
+    <script src="live-tracking.js"></script>
+    <script src="fleet-management.js"></script>
+    <script src="keyboard-shortcuts.js"></script>
+    <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
+    <script src="realtime-client.js"></script>
+    <script src="pwa.js"></script>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+
+    <!-- Dashboard Panel -->
+    <div id="dashboard-panel" class="side-panel" style="display: none;">
+        <div class="panel-header">
+            <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+            <button class="panel-close" onclick="closePanel('dashboard-panel')">&times;</button>
+        </div>
+        <div class="panel-content">
+            <!-- Quick Stats Summary -->
+            <div style="background: linear-gradient(135deg, rgba(31, 115, 232, 0.1) 0%, rgba(21, 101, 192, 0.05) 100%); padding: 18px; margin: 16px; border-radius: 10px; border-left: 4px solid #1f73e8;">
+                <h3 style="margin: 0 0 12px 0; color: #1f73e8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">System Performance</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="text-align: center; padding: 8px; background: rgba(255, 255, 255, 0.8); border-radius: 8px;">
+                        <div style="font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Uptime</div>
+                        <div style="font-size: 16px; font-weight: 700; color: #2e7d32;">100%</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background: rgba(255, 255, 255, 0.8); border-radius: 8px;">
+                        <div style="font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Status</div>
+                        <div style="font-size: 16px; font-weight: 700;"><i class="fas fa-check-circle" style="color: #2e7d32;"></i> Active</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-stat">
+                <h4>Total Routes</h4>
+                <div class="value" id="total-routes">0</div>
+            </div>
+            <div class="dashboard-stat">
+                <h4>Time Saved</h4>
+                <div class="value" id="time-saved">0 min</div>
+            </div>
+            <div class="dashboard-stat">
+                <h4>Avg. Speed</h4>
+                <div class="value" id="avg-speed">0 km/h</div>
+            </div>
+            <div class="dashboard-stat">
+                <h4>Total Distance</h4>
+                <div class="value" id="total-distance">0 km</div>
+            </div>
+
+            <!-- Advanced Stats Info -->
+            <div style="background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(27, 94, 32, 0.05) 100%); padding: 16px; margin: 16px; border-radius: 10px; border-left: 4px solid #2e7d32; border-top-right-radius: 8px; border-bottom-right-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; color: #2e7d32; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;"><i class="fas fa-info-circle"></i> Latest Update</h3>
+                <div style="font-size: 11px; color: #666; line-height: 1.6;">
+                    <div><strong>Last Route:</strong> <span id="last-route-time">Never</span></div>
+                    <div style="margin-top: 8px;"><strong>Next Update:</strong> <span id="next-update-time">Real-time</span></div>
+                </div>
+            </div>
+
+            <!-- Advanced Features Section -->
+            <div style="padding: 16px; margin: 16px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.08) 0%, rgba(255, 152, 0, 0.05) 100%); border-left: 4px solid #ffc107; border-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; color: #f57c00; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">⚡ Advanced Tools</h3>
+                <button onclick="generateRouteReport()" class="btn btn-primary" style="width: 100%; margin-bottom: 8px; font-size: 12px;">
+                    <i class="fas fa-download"></i> Download Report
+                </button>
+                <button onclick="document.getElementById('saveFavoriteModal').style.display='block'" class="btn btn-secondary" style="width: 100%; margin-bottom: 8px; font-size: 12px;">
+                    <i class="fas fa-star"></i> Save As Favorite
+                </button>
+                <button onclick="displayFavoritesModal()" class="btn btn-secondary" style="width: 100%; font-size: 12px;">
+                    <i class="fas fa-heart"></i> View Favorites
+                </button>
+            </div>
+
+            <!-- Analytics Summary -->
+            <div onclick="showAnalyticsDashboard()" style="padding: 16px; margin: 16px; background: linear-gradient(135deg, rgba(31, 115, 232, 0.1) 0%, rgba(21, 101, 192, 0.05) 100%); border: 1px solid rgba(31, 115, 232, 0.2); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                <h3 style="margin: 0 0 8px 0; color: #1f73e8; font-size: 12px; font-weight: 700;">📊 View Analytics</h3>
+                <div style="font-size: 11px; color: #666;">Click to see full performance metrics & insights</div>
+            </div>
+
+            <!-- Smart Recommendations -->
+            <div id="dashboard-recommendations" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- History Panel -->
+    <div id="history-panel" class="side-panel" style="display: none;">
+        <div class="panel-header">
+            <h2><i class="fas fa-history"></i> Route History</h2>
+            <button class="panel-close" onclick="closePanel('history-panel')">&times;</button>
+        </div>
+        <div class="panel-content">
+            <div id="history-list" class="history-list">
+                <div class="history-empty">
+                    <i class="fas fa-folder-open"></i>
+                    <p>No routes found in history</p>
+                    <small>Your route history will appear here</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="side-panel" style="display: none;">
+        <div class="panel-header">
+            <h2><i class="fas fa-cog"></i> Settings</h2>
+            <button class="panel-close" onclick="closePanel('settings-panel')">&times;</button>
+        </div>
+        <div class="panel-content">
+            <div class="settings-group">
+                <h3>Preferences</h3>
+                <div class="setting-item">
+                    <label for="theme-toggle">Dark Mode</label>
+                    <div class="toggle">
+                        <input type="checkbox" id="theme-toggle" class="toggle-input">
+                        <span class="toggle-switch"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>Route Options</h3>
+                <div class="setting-item">
+                    <label for="avoid-traffic">Avoid Traffic</label>
+                    <div class="toggle">
+                        <input type="checkbox" id="avoid-traffic" class="toggle-input" checked>
+                        <span class="toggle-switch"></span>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="show-alternatives">Show Alternatives</label>
+                    <div class="toggle">
+                        <input type="checkbox" id="show-alternatives" class="toggle-input" checked>
+                        <span class="toggle-switch"></span>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="enable-analytics">Enable Route Analytics</label>
+                    <div class="toggle">
+                        <input type="checkbox" id="enable-analytics" class="toggle-input" checked>
+                        <span class="toggle-switch"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>Notifications</h3>
+                <div class="setting-item">
+                    <label for="notifications">Enable Notifications</label>
+                    <div class="toggle">
+                        <input type="checkbox" id="notifications" class="toggle-input" checked>
+                        <span class="toggle-switch"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>About</h3>
+                <div class="about-info">
+                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Last Updated:</strong> March 23, 2026</p>
+                    <p><strong>Status:</strong> <span style="color: #2e7d32;">● Active</span></p>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="clearAllSettings()">Reset to Defaults</button>
+        </div>
+    </div>
+
+    <!-- Save Favorite Modal -->
+    <div id="saveFavoriteModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); animation: fadeIn 0.3s;">
+        <div style="background-color: white; margin: 10% auto; padding: 30px; border-radius: 12px; width: 80%; max-width: 400px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); animation: slideInRight 0.3s;">
+            <span onclick="document.getElementById('saveFavoriteModal').style.display='none'" style="color: #666; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="margin-top: 0; color: #333;">Save Favorite Route</h2>
+            <input type="text" id="favoriteName" placeholder="Enter a name for this route (e.g., 'Home to Office')" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 14px;">
+            <button onclick="saveFavoriteFromModal()" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                <i class="fas fa-save"></i> Save Favorite
+            </button>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard Modal -->
+    <div id="analyticsDashboardModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); overflow-y: auto; animation: fadeIn 0.3s;">
+        <div style="background-color: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); animation: slideInRight 0.3s;">
+            <span onclick="document.getElementById('analyticsDashboardModal').style.display='none'" style="color: #666; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="margin-top: 0; color: #1f73e8; margin-bottom: 20px;">📊 Analytics Dashboard</h2>
+            <div id="analyticsDashboardContent" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Panel Modal -->
+    <div id="recommendationsModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); overflow-y: auto; animation: fadeIn 0.3s;">
+        <div style="background-color: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); animation: slideInRight 0.3s;">
+            <span onclick="document.getElementById('recommendationsModal').style.display='none'" style="color: #666; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="margin-top: 0; color: #f57c00; margin-bottom: 20px;">🎯 Smart Recommendations</h2>
+            <div id="recommendationsContent" style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites Quick Access Modal -->
+    <div id="favoritesModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); overflow-y: auto; animation: fadeIn 0.3s;">
+        <div style="background-color: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 700px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); animation: slideInRight 0.3s;">
+            <span onclick="document.getElementById('favoritesModal').style.display='none'" style="color: #666; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="margin-top: 0; color: #f57c00; margin-bottom: 20px;">⭐ Your Favorite Routes</h2>
+            <div id="favoritesContent" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

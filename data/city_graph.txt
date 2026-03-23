@@ -1,0 +1,19 @@
+# City Network Graph
+# Format: node_name,latitude,longitude,type
+
+# Dehradun & Clement Town landmarks
+Graphic Era University,30.2835,78.0139,institution
+ISBT Dehradun,30.2886,77.9984,bus_terminal
+Clock Tower Dehradun,30.3256,78.0419,landmark
+Forest Research Institute,30.3380,77.9994,institution
+Clement Town Market,30.2709,78.0181,market
+
+# ROADS/EDGES (connections between nodes)
+# Format: from,to,distance_km,traffic_multiplier
+
+Graphic Era University,ISBT Dehradun,2.0,1.1
+Graphic Era University,Clement Town Market,1.7,1.0
+ISBT Dehradun,Forest Research Institute,5.1,1.2
+ISBT Dehradun,Clock Tower Dehradun,6.0,1.2
+Clock Tower Dehradun,Forest Research Institute,4.8,1.1
+Clock Tower Dehradun,Clement Town Market,6.3,1.3

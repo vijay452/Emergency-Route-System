@@ -1,0 +1,64 @@
+{
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "environment": "development",
+    "timeout": 30000
+  },
+  "frontend": {
+    "port": 8000,
+    "baseURL": "http://localhost:3000",
+    "tileServer": "https://tile.openstreetmap.org"
+  },
+  "pathfinding": {
+    "algorithm": "dijkstra",
+    "alternative_algorithms": ["astar", "bellman-ford"],
+    "traffic_weight": 1.5,
+    "priority_weight": 2.0,
+    "max_path_length": 100
+  },
+  "map": {
+    "center": {
+      "latitude": 30.2865,
+      "longitude": 78.0158
+    },
+    "defaultZoom": 13,
+    "minZoom": 10,
+    "maxZoom": 18
+  },
+  "data": {
+    "graph_file": "./data/city_graph.txt",
+    "traffic_file": "./data/traffic_data.txt"
+  },
+  "traffic": {
+    "update_interval_ms": 30000,
+    "congestion_threshold": 0.7,
+    "severe_threshold": 0.9
+  },
+  "performance": {
+    "max_response_time_ms": 1000,
+    "cache_enabled": true,
+    "cache_ttl_ms": 60000
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "file": "./logs/app.log"
+  },
+  "emergency_services": {
+    "types": ["hospital", "fire_station", "police", "ambulance", "clinic"],
+    "priority": {
+      "hospital": 1,
+      "fire_station": 2,
+      "ambulance": 1,
+      "police": 3,
+      "clinic": 4
+    }
+  },
+  "features": {
+    "real_time_updates": true,
+    "route_optimization": true,
+    "traffic_integration": true,
+    "multi_route_suggestions": true
+  }
+}

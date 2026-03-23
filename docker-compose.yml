@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - LOG_LEVEL=info
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    depends_on:
+      - core
+    networks:
+      - emergency-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8000:8000"
+    environment:
+      - API_BASE_URL=http://backend:3000
+    depends_on:
+      - backend
+    networks:
+      - emergency-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  core:
+    build:
+      context: .
+      dockerfile: Dockerfile.core
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    networks:
+      - emergency-network
+
+networks:
+  emergency-network:
+    driver: bridge
+
+volumes:
+  data:
+  config:

@@ -1,0 +1,20 @@
+# Dockerfile for C++ Core Engine
+FROM gcc:11-bullseye
+
+WORKDIR /app
+
+# Install build tools
+RUN apt-get update && apt-get install -y make && rm -rf /var/lib/apt/lists/*
+
+# Copy source files
+COPY core /app/core
+COPY data /app/data
+
+WORKDIR /app/core
+
+# Compile
+RUN g++ -std=c++17 -O2 -o route_engine main.cpp dijkstra.cpp graph.cpp
+
+
+# Run
+CMD ["./route_engine"]

@@ -1,0 +1,10 @@
+{
+  "name": "Emergency Route System",
+  "short_name": "EmergencyRoute",
+  "description": "Emergency dispatch routing and fleet coordination dashboard",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1f73e8",
+  "orientation": "portrait-primary"
+}

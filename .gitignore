@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.exe
+*.out
+build/
+dist/
+*.bin
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS
+.git/
+.github/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Runtime generated data
+backend/data/runtime-db.json
+
+# Cache
+.cache/
+*.cache
+
+# Platform specific
+core/route_engine.exe
+core/route_engine
+
+# Node package lock files (optional)
+package-lock.json
+yarn.lock
