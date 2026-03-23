@@ -51,18 +51,18 @@
     }
 
     .sidebar {
-        position: fixed;
+        position: relative;
         left: 0;
-        top: 60px;
+        top: 0;
         width: 100%;
         height: auto;
-        max-height: 250px;
-        z-index: 100;
+        max-height: none;
+        z-index: 1;
         overflow-y: auto;
         background: white;
         border-right: none;
         border-bottom: 1px solid #ddd;
-        display: none;
+        display: block;
     }
 
     .sidebar.active {
@@ -230,7 +230,7 @@
     }
 
     .sidebar {
-        max-height: 200px;
+        max-height: none;
     }
 
     .search-section h3,
