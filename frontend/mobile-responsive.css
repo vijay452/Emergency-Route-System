@@ -35,7 +35,9 @@
 
     .navbar {
         flex-wrap: wrap;
-        padding: 12px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(8px);
     }
 
     .navbar-brand {
@@ -141,12 +143,38 @@
         box-shadow: 0 6px 18px rgba(15, 34, 68, 0.08);
     }
 
+    .search-section {
+        border: 1px solid #e4ebf5;
+    }
+
     /* Keep first mobile screen simple and focused */
     .help-text,
     .map-pick-actions,
     #map-pick-status,
     .traffic-section {
         display: none;
+    }
+
+    .mobile-more-options-btn {
+        display: inline-flex;
+        margin-top: 2px;
+        background: #f4f7fb;
+        border-color: #d5deec;
+        color: #244c8f;
+    }
+
+    body.mobile-show-more .help-text {
+        display: block;
+    }
+
+    body.mobile-show-more .map-pick-actions {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    body.mobile-show-more #map-pick-status,
+    body.mobile-show-more .traffic-section {
+        display: block;
     }
 
     .input-group {
@@ -160,14 +188,13 @@
     }
 
     .map-pick-actions {
-        display: flex;
-        flex-wrap: wrap;
+        display: none;
         gap: 6px;
     }
 
     .map-action-btn {
         flex: 1;
-        min-width: 100px;
+        min-width: 140px;
         padding: 8px !important;
         font-size: 12px !important;
     }

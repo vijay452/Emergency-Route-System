@@ -82,6 +82,31 @@ function switchToMobileFormView() {
     }
 }
 
+function setupMobileOptionsToggle() {
+    if (!isMobileViewport()) {
+        return;
+    }
+
+    const toggleBtn = document.getElementById('mobile-more-options-btn');
+    if (!toggleBtn) {
+        return;
+    }
+
+    const updateLabel = () => {
+        const expanded = document.body.classList.contains('mobile-show-more');
+        toggleBtn.innerHTML = expanded
+            ? '<i class="fas fa-eye-slash"></i> Hide Extra Options'
+            : '<i class="fas fa-sliders-h"></i> Show More Options';
+    };
+
+    toggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('mobile-show-more');
+        updateLabel();
+    });
+
+    updateLabel();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // On mobile/touch devices, force-remove keyboard hint if stale cached script injects it.
     const isMobileLike = window.matchMedia('(max-width: 768px)').matches
@@ -91,11 +116,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (isMobileLike) {
         document.body.classList.remove('mobile-map-focus');
+        document.body.classList.remove('mobile-show-more');
 
         const backToFormBtn = document.getElementById('mobile-back-to-form');
         if (backToFormBtn) {
             backToFormBtn.addEventListener('click', switchToMobileFormView);
         }
+
+        setupMobileOptionsToggle();
 
         const removeKeyboardHint = () => {
             const hint = document.getElementById('keyboard-hint');
