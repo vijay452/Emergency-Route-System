@@ -38,6 +38,29 @@ const dehradunBounds = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    // On mobile/touch devices, force-remove keyboard hint if stale cached script injects it.
+    const isMobileLike = window.matchMedia('(max-width: 768px)').matches
+        || window.matchMedia('(pointer: coarse)').matches
+        || ('ontouchstart' in window)
+        || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+
+    if (isMobileLike) {
+        const removeKeyboardHint = () => {
+            const hint = document.getElementById('keyboard-hint');
+            if (hint) {
+                hint.remove();
+            }
+        };
+
+        removeKeyboardHint();
+        setTimeout(removeKeyboardHint, 2500);
+        setTimeout(removeKeyboardHint, 5000);
+
+        const observer = new MutationObserver(() => removeKeyboardHint());
+        observer.observe(document.body, { childList: true, subtree: true });
+        setTimeout(() => observer.disconnect(), 8000);
+    }
+
     // Initialize map first
     initializeMap();
     

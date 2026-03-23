@@ -212,7 +212,22 @@
     <script src="advanced-features.js"></script>
     <script src="live-tracking.js"></script>
     <script src="fleet-management.js"></script>
-    <script src="keyboard-shortcuts.js"></script>
+    <script>
+        (function () {
+            const isMobileLike = window.matchMedia('(max-width: 768px)').matches
+                || window.matchMedia('(pointer: coarse)').matches
+                || ('ontouchstart' in window)
+                || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+
+            if (isMobileLike) {
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = 'keyboard-shortcuts.js';
+            document.body.appendChild(script);
+        })();
+    </script>
     <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
     <script src="realtime-client.js"></script>
     <script src="pwa.js"></script>
