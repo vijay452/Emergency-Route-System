@@ -24,6 +24,10 @@
 
 /* Tablet & Phone (<=768px) */
 @media (max-width: 768px) {
+    .container {
+        height: 100dvh;
+    }
+
     body {
         font-size: 14px;
     }
@@ -63,13 +67,15 @@
         top: 0;
         width: 100%;
         height: auto;
-        max-height: none;
+        max-height: 34dvh;
         z-index: 1;
         overflow-y: auto;
+        overscroll-behavior: contain;
         background: white;
         border-right: none;
         border-bottom: 1px solid #ddd;
         display: block;
+        order: 2;
     }
 
     .sidebar.active {
@@ -78,10 +84,15 @@
 
     .main-wrapper {
         padding-top: 0;
+        height: calc(100dvh - 122px);
+        overflow: hidden;
     }
 
     .map-container {
-        height: 60vh;
+        order: 1;
+        flex: 1;
+        height: auto;
+        min-height: 50dvh;
     }
 
     .search-section,
@@ -237,7 +248,7 @@
     }
 
     .sidebar {
-        max-height: none;
+        max-height: 36dvh;
     }
 
     .search-section h3,
@@ -246,7 +257,7 @@
     }
 
     .map-container {
-        height: 50vh;
+        min-height: 48dvh;
     }
 
     .btn {
@@ -353,11 +364,11 @@
 /* Portrait orientation */
 @media (max-width: 768px) and (orientation: portrait) {
     .map-container {
-        height: 50vh;
+        min-height: 52dvh;
     }
 
     .sidebar {
-        max-height: 200px;
+        max-height: 34dvh;
     }
 }
 
