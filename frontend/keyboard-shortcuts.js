@@ -292,6 +292,15 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         let hint = document.getElementById('keyboard-hint');
         if (!hint) {
+                    // Skip showing keyboard hint on mobile/touch devices
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                                   || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2)
+                                   || window.matchMedia('(max-width: 768px)').matches;
+        
+                    if (isMobile) {
+                        return; // Don't show keyboard shortcuts on mobile
+                    }
+        
             hint = document.createElement('div');
             hint.id = 'keyboard-hint';
             hint.style.cssText = `
