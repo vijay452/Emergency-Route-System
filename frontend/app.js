@@ -37,6 +37,51 @@ const dehradunBounds = {
     south: 30.20
 };
 
+function isMobileViewport() {
+    return window.matchMedia('(max-width: 768px)').matches
+        || window.matchMedia('(pointer: coarse)').matches
+        || ('ontouchstart' in window)
+        || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+}
+
+function switchToMobileMapView() {
+    if (!isMobileViewport()) {
+        return;
+    }
+
+    document.body.classList.add('mobile-map-focus');
+
+    const mapContainer = document.querySelector('.map-container');
+    if (mapContainer) {
+        mapContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (window.map) {
+        setTimeout(() => {
+            window.map.invalidateSize();
+        }, 250);
+    }
+}
+
+function switchToMobileFormView() {
+    if (!isMobileViewport()) {
+        return;
+    }
+
+    document.body.classList.remove('mobile-map-focus');
+
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (window.map) {
+        setTimeout(() => {
+            window.map.invalidateSize();
+        }, 250);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // On mobile/touch devices, force-remove keyboard hint if stale cached script injects it.
     const isMobileLike = window.matchMedia('(max-width: 768px)').matches
@@ -45,6 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
         || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
 
     if (isMobileLike) {
+        document.body.classList.remove('mobile-map-focus');
+
+        const backToFormBtn = document.getElementById('mobile-back-to-form');
+        if (backToFormBtn) {
+            backToFormBtn.addEventListener('click', switchToMobileFormView);
+        }
+
         const removeKeyboardHint = () => {
             const hint = document.getElementById('keyboard-hint');
             if (hint) {
@@ -308,6 +360,7 @@ async function findRoute() {
         displayRoute(primary, allRoutes);
         updateMapWithRoute(primary, allRoutes);
         updateSignalControlForRoute(primary);
+        switchToMobileMapView();
 
         // Track analytics
         if (isRouteAnalyticsEnabled() && typeof trackRouteAnalytics === 'function' && primary) {
