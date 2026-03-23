@@ -1,0 +1,161 @@
+﻿
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.4)
+
+2026-03-23T19:17:26.539+05:30  INFO 25628 --- [           main] c.ers.EmergencyRouteSystemApplication    : Starting EmergencyRouteSystemApplication v1.0.0 using Java 25.0.2 with PID 25628 (C:\Users\rohit koshyari\Desktop\emergency rout system\Emergency-Route-System\backend-spring\target\backend-spring-1.0.0.jar started by rohit koshyari in C:\Users\rohit koshyari\Desktop\emergency rout system\Emergency-Route-System\backend-spring)
+2026-03-23T19:17:26.548+05:30  INFO 25628 --- [           main] c.ers.EmergencyRouteSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-23T19:17:27.680+05:30  INFO 25628 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2026-03-23T19:17:27.765+05:30  INFO 25628 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 77 ms. Found 3 MongoDB repository interfaces.
+java : WARNING: A restricted method in java.lang.System has been called
+At line:1 char:1
++ java -jar target\backend-spring-1.0.0.jar *>&1 | Out-File -Encoding u ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: A rest...has been called:String) [], Remo 
+   teException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed 
+module (jar:nested:/C:/Users/rohit%20koshyari/Desktop/emergency%20rout%20system/Emergency-Route-
+System/backend-spring/target/backend-spring-1.0.0.jar/!BOOT-INF/lib/tomcat-embed-core-10.1.19.ja
+r!/)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-03-23T19:17:28.597+05:30  INFO 25628 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-03-23T19:17:28.616+05:30  INFO 25628 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-23T19:17:28.616+05:30  INFO 25628 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-03-23T19:17:28.666+05:30  INFO 25628 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-23T19:17:28.667+05:30  INFO 25628 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1981 ms
+2026-03-23T19:17:31.138+05:30  INFO 25628 --- [           main] org.mongodb.driver.client                : MongoClient with metadata {"application": {"name": "Cluster0"}, "driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "4.11.1"}, "os": {"type": "Windows", "name": "Windows 11", "architecture": "amd64", "version": "10.0"}, "platform": "Java/Oracle Corporation/25.0.2+10-LTS-69"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=MongoCredential{mechanism=null, userName='Rohit', source='admin', password=<hidden>, mechanismProperties=<hidden>}, transportSettings=null, streamFactoryFactory=null, commandListeners=[], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@3f362135, com.mongodb.Jep395RecordCodecProvider@21eee94f, com.mongodb.KotlinCodecProvider@6bc24e72]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[127.0.0.1:27017], srvHost=cluster0.0jnpmh7.mongodb.net, srvServiceName=mongodb, mode=MULTIPLE, requiredClusterType=REPLICA_SET, requiredReplicaSetName='atlas-zmeron-shard-0', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=true, invalidHostNameAllowed=false, context=null}, applicationName='Cluster0', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null}
+2026-03-23T19:17:31.193+05:30  INFO 25628 --- [mh7.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-7hp2rbg-shard-00-02.0jnpmh7.mongodb.net:27017 to client view of cluster
+2026-03-23T19:17:31.203+05:30  WARN 25628 --- [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'routeController' defined in URL [jar:nested:/C:/Users/rohit%20koshyari/Desktop/emergency%20rout%20system/Emergency-Route-System/backend-spring/target/backend-spring-1.0.0.jar/!BOOT-INF/classes/!/com/ers/controller/RouteController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'cityNodeRepository' defined in com.ers.repository.CityNodeRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+2026-03-23T19:17:31.258+05:30  INFO 25628 --- [mh7.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-7hp2rbg-shard-00-00.0jnpmh7.mongodb.net:27017 to client view of cluster
+2026-03-23T19:17:31.262+05:30  INFO 25628 --- [mh7.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-7hp2rbg-shard-00-01.0jnpmh7.mongodb.net:27017 to client view of cluster
+2026-03-23T19:17:31.267+05:30  WARN 25628 --- [mh7.mongodb.net] org.mongodb.driver.cluster               : Exception in monitor thread during notification of DNS resolution state change
+
+com.mongodb.MongoInterruptedException: Interrupted waiting for lock
+	at com.mongodb.internal.thread.InterruptionUtil.interruptAndCreateMongoInterruptedException(InterruptionUtil.java:41) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.lockInterruptibly(Locks.java:76) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.checkedWithInterruptibleLock(Locks.java:64) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.withInterruptibleLock(Locks.java:59) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.withInterruptibleLock(Locks.java:52) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.BaseCluster.withLock(BaseCluster.java:226) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.AbstractMultiServerCluster.withLock(AbstractMultiServerCluster.java:54) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.BaseCluster.updateDescription(BaseCluster.java:198) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.AbstractMultiServerCluster.updateDescription(AbstractMultiServerCluster.java:387) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.AbstractMultiServerCluster.lambda$initialize$0(AbstractMultiServerCluster.java:100) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.lambda$withInterruptibleLock$1(Locks.java:53) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.checkedWithInterruptibleLock(Locks.java:66) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.withInterruptibleLock(Locks.java:59) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.Locks.withInterruptibleLock(Locks.java:52) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.BaseCluster.withLock(BaseCluster.java:226) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.AbstractMultiServerCluster.withLock(AbstractMultiServerCluster.java:54) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.AbstractMultiServerCluster.initialize(AbstractMultiServerCluster.java:96) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.DnsMultiServerCluster$1.initialize(DnsMultiServerCluster.java:54) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at com.mongodb.internal.connection.DefaultDnsSrvRecordMonitor$DnsSrvRecordMonitorRunnable.run(DefaultDnsSrvRecordMonitor.java:89) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+Caused by: java.lang.InterruptedException: null
+	at java.base/java.util.concurrent.locks.ReentrantLock$Sync.lockInterruptibly(ReentrantLock.java:160) ~[na:na]
+	at java.base/java.util.concurrent.locks.ReentrantLock.lockInterruptibly(ReentrantLock.java:373) ~[na:na]
+	at com.mongodb.internal.Locks.lockInterruptibly(Locks.java:74) ~[mongodb-driver-core-4.11.1.jar!/:na]
+	... 18 common frames omitted
+
+2026-03-23T19:17:31.279+05:30  INFO 25628 --- [           main] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-03-23T19:17:31.299+05:30  INFO 25628 --- [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-03-23T19:17:31.325+05:30 ERROR 25628 --- [           main] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'routeController' defined in URL [jar:nested:/C:/Users/rohit%20koshyari/Desktop/emergency%20rout%20system/Emergency-Route-System/backend-spring/target/backend-spring-1.0.0.jar/!BOOT-INF/classes/!/com/ers/controller/RouteController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'cityNodeRepository' defined in com.ers.repository.CityNodeRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1355) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:962) ~[spring-context-6.1.5.jar!/:6.1.5]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-6.1.5.jar!/:6.1.5]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.2.4.jar!/:3.2.4]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.2.4.jar!/:3.2.4]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.2.4.jar!/:3.2.4]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.4.jar!/:3.2.4]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-3.2.4.jar!/:3.2.4]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1343) ~[spring-boot-3.2.4.jar!/:3.2.4]
+	at com.ers.EmergencyRouteSystemApplication.main(EmergencyRouteSystemApplication.java:12) ~[!/:1.0.0]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91) ~[backend-spring-1.0.0.jar:1.0.0]
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53) ~[backend-spring-1.0.0.jar:1.0.0]
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58) ~[backend-spring-1.0.0.jar:1.0.0]
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'cityNodeRepository' defined in com.ers.repository.CityNodeRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:377) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1685) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1434) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	... 24 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'mongoTemplate' defined in class path resource [org/springframework/boot/autoconfigure/data/mongo/MongoDatabaseFactoryDependentConfiguration.class]: Unsatisfied dependency expressed through method 'mongoTemplate' parameter 0: Error creating bean with name 'mongoDatabaseFactory' defined in class path resource [org/springframework/boot/autoconfigure/data/mongo/MongoDatabaseFactoryConfiguration.class]: Failed to instantiate [org.springframework.data.mongodb.core.MongoDatabaseFactorySupport]: Factory method 'mongoDatabaseFactory' threw exception with message: Database name must not be empty
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:542) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1335) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1165) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	... 38 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'mongoDatabaseFactory' defined in class path resource [org/springframework/boot/autoconfigure/data/mongo/MongoDatabaseFactoryConfiguration.class]: Failed to instantiate [org.springframework.data.mongodb.core.MongoDatabaseFactorySupport]: Factory method 'mongoDatabaseFactory' threw exception with message: Database name must not be empty
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:648) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:636) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1335) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1165) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	... 48 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.data.mongodb.core.MongoDatabaseFactorySupport]: Factory method 'mongoDatabaseFactory' threw exception with message: Database name must not be empty
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:177) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:644) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	... 62 common frames omitted
+Caused by: java.lang.IllegalArgumentException: Database name must not be empty
+	at org.springframework.util.Assert.hasText(Assert.java:240) ~[spring-core-6.1.5.jar!/:6.1.5]
+	at org.springframework.data.mongodb.core.MongoDatabaseFactorySupport.<init>(MongoDatabaseFactorySupport.java:68) ~[spring-data-mongodb-4.2.4.jar!/:4.2.4]
+	at org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory.<init>(SimpleMongoClientDatabaseFactory.java:75) ~[spring-data-mongodb-4.2.4.jar!/:4.2.4]
+	at org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory.<init>(SimpleMongoClientDatabaseFactory.java:64) ~[spring-data-mongodb-4.2.4.jar!/:4.2.4]
+	at org.springframework.boot.autoconfigure.data.mongo.MongoDatabaseFactoryConfiguration.mongoDatabaseFactory(MongoDatabaseFactoryConfiguration.java:52) ~[spring-boot-autoconfigure-3.2.4.jar!/:3.2.4]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:140) ~[spring-beans-6.1.5.jar!/:6.1.5]
+	... 63 common frames omitted
+

@@ -286,6 +286,13 @@ async function findRoute() {
         updateMapWithRoute(primary, allRoutes);
         updateSignalControlForRoute(primary);
 
+        try {
+            await persistRouteCalculation(primary, startPoint, endPoint);
+            console.log('Successfully stored route calculation in MongoDB.');
+        } catch (dbError) {
+            console.error('Failed to save route calculation:', dbError);
+        }
+
         // Track analytics
         if (isRouteAnalyticsEnabled() && typeof trackRouteAnalytics === 'function' && primary) {
             trackRouteAnalytics({
@@ -694,6 +701,43 @@ function buildStepInstruction(step) {
     if (type === 'arrive') return 'Arrive at destination';
     if (modifier) return `${capitalize(modifier)} onto ${road}`;
     return `Continue on ${road}`;
+}
+
+async function persistRouteCalculation(route, startPoint, endPoint) {
+    if (!route) return;
+
+    const apiBase = await discoverApiBaseUrl();
+    const response = await fetch(`${apiBase}/api/route-history`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            start: route.start || startPoint?.label || '',
+            end: route.end || endPoint?.label || '',
+            emergencyType: emergencyType || 'ambulance',
+            distanceKm: Number(route.distance || 0),
+            estimatedTimeMin: Number(route.time || 0),
+            rawTimeMin: Number(route.rawTime || route.time || 0),
+            status: route.status || 'Calculated',
+            roads: Array.isArray(route.path) ? route.path : [],
+            startPoint: startPoint ? {
+                label: startPoint.displayName || startPoint.label || route.start || '',
+                lat: Number(startPoint.lat),
+                lng: Number(startPoint.lng)
+            } : null,
+            endPoint: endPoint ? {
+                label: endPoint.displayName || endPoint.label || route.end || '',
+                lat: Number(endPoint.lat),
+                lng: Number(endPoint.lng)
+            } : null
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Route persistence failed (${response.status}): ${errorText}`);
+    }
+
+    return response.json();
 }
 
 function capitalize(text) {

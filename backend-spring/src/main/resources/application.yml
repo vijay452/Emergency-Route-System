@@ -1,0 +1,20 @@
+server:
+  port: 3000
+
+spring:
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/emergency_routes}
+      database: ${SPRING_DATA_MONGODB_DATABASE:emergency_routes}
+
+socket:
+  io:
+    port: 3001
+    host: localhost
+
+ers:
+  data:
+    graph-path: ../data/city_graph.txt
+    traffic-path: ../data/traffic_data.txt
+  core:
+    binary-path: ../core/route_engine

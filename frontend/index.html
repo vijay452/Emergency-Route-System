@@ -300,6 +300,40 @@
             <button class="panel-close" onclick="closePanel('history-panel')">&times;</button>
         </div>
         <div class="panel-content">
+            <div class="history-toolbar">
+                <div class="history-summary-grid">
+                    <div class="history-summary-card">
+                        <span class="history-summary-label">Saved Routes</span>
+                        <strong id="history-total-count">0</strong>
+                    </div>
+                    <div class="history-summary-card">
+                        <span class="history-summary-label">Avg Time</span>
+                        <strong id="history-average-time">0 min</strong>
+                    </div>
+                    <div class="history-summary-card">
+                        <span class="history-summary-label">Avg Distance</span>
+                        <strong id="history-average-distance">0 km</strong>
+                    </div>
+                </div>
+                <div class="history-controls">
+                    <input id="history-search" class="history-search-input" type="text" placeholder="Search origin or destination">
+                    <select id="history-filter-type" class="history-filter-select">
+                        <option value="all">All Emergency Types</option>
+                        <option value="ambulance">Ambulance</option>
+                        <option value="fire">Fire</option>
+                        <option value="police">Police</option>
+                    </select>
+                </div>
+                <div class="history-actions">
+                    <button class="btn btn-secondary history-action-btn" onclick="refreshRemoteHistory()">
+                        <i class="fas fa-rotate"></i> Refresh
+                    </button>
+                    <button class="btn btn-secondary history-action-btn" onclick="clearAllHistory()">
+                        <i class="fas fa-broom"></i> Clear Local Cache
+                    </button>
+                </div>
+                <div id="history-source-note" class="history-source-note">Loading route history...</div>
+            </div>
             <div id="history-list" class="history-list">
                 <div class="history-empty">
                     <i class="fas fa-folder-open"></i>
