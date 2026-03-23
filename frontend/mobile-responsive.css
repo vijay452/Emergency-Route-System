@@ -39,15 +39,22 @@
     }
 
     .navbar-menu {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         flex: 1 1 100%;
         gap: 4px;
+        width: 100%;
     }
 
     .nav-link {
         font-size: 12px;
         padding: 8px 12px;
-        flex: 1;
+        min-height: 40px;
         text-align: center;
+        justify-content: center;
+        background: #f6f8fb;
+        border: 1px solid #dbe3ee;
+        border-radius: 8px;
     }
 
     .sidebar {
