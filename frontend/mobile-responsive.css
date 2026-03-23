@@ -44,22 +44,24 @@
     }
 
     .navbar-menu {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: flex;
         flex: 1 1 100%;
-        gap: 4px;
+        gap: 6px;
         width: 100%;
+        overflow-x: auto;
+        padding-bottom: 2px;
     }
 
     .nav-link {
         font-size: 12px;
-        padding: 8px 12px;
-        min-height: 40px;
+        padding: 8px 10px;
+        min-height: 38px;
+        min-width: max-content;
         text-align: center;
         justify-content: center;
-        background: #f6f8fb;
-        border: 1px solid #dbe3ee;
-        border-radius: 8px;
+        background: #f7f9fc;
+        border: 1px solid #d9e2f0;
+        border-radius: 999px;
     }
 
     .sidebar {
@@ -133,12 +135,22 @@
 
     .search-section,
     .traffic-section {
-        padding: 12px;
-        margin: 8px;
+        padding: 14px;
+        margin: 10px;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(15, 34, 68, 0.08);
+    }
+
+    /* Keep first mobile screen simple and focused */
+    .help-text,
+    .map-pick-actions,
+    #map-pick-status,
+    .traffic-section {
+        display: none;
     }
 
     .input-group {
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
 
     .btn {
