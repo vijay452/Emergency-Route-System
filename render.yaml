@@ -18,7 +18,7 @@ services:
       - key: OPENWEATHER_API_KEY
         sync: false
 
-  - type: static_site
+  - type: static
     name: emergency-route-frontend
     rootDir: frontend
     buildCommand: "sh -c \"echo \\\"window.ERS_API_BASE='${ERS_API_BASE:-}'\\\" > runtime-config.js\""
