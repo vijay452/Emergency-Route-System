@@ -4,7 +4,7 @@ Unit tests for the Emergency Route System (emergency_route.py).
 
 import pytest
 from typing import Dict, Tuple
-from emergency_route import Graph, build_demo_graph, _format_route
+from emergency_route import Graph, build_demo_graph, _format_route, _resolve_location
 
 
 # ---------------------------------------------------------------------------
@@ -201,3 +201,71 @@ class TestFormatRoute:
     def test_format_arrow_separator(self):
         result = _format_route(["X", "Y", "Z"], 5.0)
         assert "→" in result
+
+
+# ---------------------------------------------------------------------------
+# _resolve_location – case-insensitive lookup
+# ---------------------------------------------------------------------------
+
+class TestResolveLocation:
+    def test_exact_match(self):
+        g = build_demo_graph()
+        assert _resolve_location(g, "Hospital") == "Hospital"
+
+    def test_lowercase_match(self):
+        g = build_demo_graph()
+        assert _resolve_location(g, "hospital") == "Hospital"
+
+    def test_uppercase_match(self):
+        g = build_demo_graph()
+        assert _resolve_location(g, "AIRPORT") == "Airport"
+
+    def test_mixed_case_match(self):
+        g = build_demo_graph()
+        assert _resolve_location(g, "cItY cEnTeR") == "City Center"
+
+    def test_no_match_returns_none(self):
+        g = build_demo_graph()
+        assert _resolve_location(g, "Atlantis") is None
+
+    def test_whitespace_stripped(self):
+        g = build_demo_graph()
+        assert _resolve_location(g, "  Airport  ") == "Airport"
+
+    def test_empty_graph_returns_none(self):
+        g = Graph()
+        assert _resolve_location(g, "Anywhere") is None
+
+
+# ---------------------------------------------------------------------------
+# Graph – additional edge cases
+# ---------------------------------------------------------------------------
+
+class TestGraphEdgeCases:
+    def test_add_location_idempotent(self):
+        """Adding a location twice should not create duplicate entries."""
+        g = Graph()
+        g.add_location("Alpha")
+        g.add_location("Alpha")
+        assert g.locations.count("Alpha") == 1
+
+    def test_multiple_roads_same_pair(self):
+        """Adding two roads between the same pair: cheapest wins; costlier does not replace it."""
+        g = Graph()
+        g.add_road("A", "B", 10)
+        g.add_road("A", "B", 3)
+        time, _ = g.dijkstra("A", "B")
+        assert time == pytest.approx(3.0)
+        # Adding a more expensive road afterwards must not worsen the result
+        g.add_road("A", "B", 20)
+        time2, _ = g.dijkstra("A", "B")
+        assert time2 == pytest.approx(3.0)
+
+    def test_disconnected_graph(self):
+        """Dijkstra returns None for unconnected components."""
+        g = Graph()
+        g.add_road("A", "B", 1)
+        g.add_road("C", "D", 1)
+        time, path = g.dijkstra("A", "D")
+        assert time is None
+        assert path == []

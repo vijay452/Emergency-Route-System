@@ -7,7 +7,7 @@ shortest-path algorithm.  Locations are modelled as graph nodes; roads
 """
 
 import heapq
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 
 class Graph:
@@ -97,7 +97,7 @@ class Graph:
         # min-heap: (cost, node)
         heap: List[Tuple[float, str]] = [(0.0, start)]
 
-        visited: set = set()
+        visited: Set[str] = set()
 
         while heap:
             cost, node = heapq.heappop(heap)
@@ -163,7 +163,7 @@ def build_demo_graph() -> Graph:
 
 
 # ---------------------------------------------------------------------------
-# CLI
+# CLI helpers
 # ---------------------------------------------------------------------------
 
 def _format_route(path: List[str], total_time: float) -> str:
@@ -177,11 +177,30 @@ def _format_route(path: List[str], total_time: float) -> str:
 
 
 def _list_locations(graph: Graph) -> None:
+    if not graph.locations:
+        print("\n  (no locations added yet)\n")
+        return
     print("\nAvailable locations:")
     for loc in graph.locations:
         print(f"  • {loc}")
     print()
 
+
+def _resolve_location(graph: Graph, raw: str) -> Optional[str]:
+    """
+    Return the canonical location name that matches *raw* case-insensitively.
+    Returns ``None`` when no match is found.
+    """
+    target = raw.strip().lower()
+    for loc in graph.locations:
+        if loc.lower() == target:
+            return loc
+    return None
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 def main() -> None:
     """Interactive command-line interface for the Emergency Route System."""
@@ -189,42 +208,94 @@ def main() -> None:
     print("       EMERGENCY ROUTE SYSTEM")
     print("  Fastest route calculator for emergency vehicles")
     print("=" * 60)
+    print("\nStarting with the built-in demo city graph.")
+    print("Use options 3 and 4 to add your own locations and roads.\n")
 
     graph = build_demo_graph()
 
     while True:
-        print("\nOptions:")
+        print("Options:")
         print("  1. Find fastest route")
         print("  2. List all locations")
-        print("  3. Exit")
-        choice = input("Select option [1/2/3]: ").strip()
+        print("  3. Add a location")
+        print("  4. Add a road between two locations")
+        print("  5. Exit")
+        choice = input("Select option [1-5]: ").strip()
 
-        if choice == "3":
+        if choice == "5":
             print("Goodbye.")
             break
 
-        if choice == "2":
+        elif choice == "2":
             _list_locations(graph)
-            continue
 
-        if choice == "1":
-            _list_locations(graph)
-            start = input("Enter start location: ").strip()
-            end = input("Enter destination: ").strip()
-
-            try:
-                total_time, path = graph.dijkstra(start, end)
-            except KeyError as exc:
-                print(f"\n  Error: {exc}")
+        elif choice == "3":
+            name = input("Enter new location name: ").strip()
+            if not name:
+                print("  Location name cannot be empty.\n")
                 continue
+            existing = _resolve_location(graph, name)
+            if existing is not None:
+                print(f"  Location '{existing}' already exists.\n")
+            else:
+                graph.add_location(name)
+                print(f"  ✔ Location '{name}' added.\n")
 
+        elif choice == "4":
+            _list_locations(graph)
+            if len(graph.locations) < 2:
+                print("  Need at least 2 locations to add a road.\n")
+                continue
+            origin_raw = input("Enter origin location: ").strip()
+            dest_raw = input("Enter destination location: ").strip()
+            origin = _resolve_location(graph, origin_raw)
+            dest = _resolve_location(graph, dest_raw)
+            if origin is None:
+                print(f"  Error: location '{origin_raw}' not found.\n")
+                continue
+            if dest is None:
+                print(f"  Error: location '{dest_raw}' not found.\n")
+                continue
+            time_str = input("Enter travel time in minutes: ").strip()
+            try:
+                travel_time = float(time_str)
+            except ValueError:
+                print("  Error: travel time must be a number.\n")
+                continue
+            bidir_str = input("Bidirectional road? [y/n] (default y): ").strip().lower()
+            bidirectional = bidir_str != "n"
+            try:
+                graph.add_road(origin, dest, travel_time, bidirectional)
+            except ValueError as exc:
+                print(f"  Error: {exc}\n")
+                continue
+            direction = "↔" if bidirectional else "→"
+            print(f"  ✔ Road added: {origin} {direction} {dest} ({travel_time} min)\n")
+
+        elif choice == "1":
+            _list_locations(graph)
+            if len(graph.locations) < 2:
+                print("  Need at least 2 locations to find a route.\n")
+                continue
+            start_raw = input("Enter start location: ").strip()
+            end_raw = input("Enter destination: ").strip()
+            start = _resolve_location(graph, start_raw)
+            end = _resolve_location(graph, end_raw)
+            if start is None:
+                print(f"\n  Error: location '{start_raw}' not found.\n")
+                continue
+            if end is None:
+                print(f"\n  Error: location '{end_raw}' not found.\n")
+                continue
+            total_time, path = graph.dijkstra(start, end)
             if total_time is None:
-                print(f"\n  No route found from '{start}' to '{end}'.")
+                print(f"\n  No route found from '{start}' to '{end}'.\n")
             else:
                 print("\n✔ Fastest route found:")
                 print(_format_route(path, total_time))
+
         else:
-            print("  Invalid option. Please enter 1, 2, or 3.")
+            print("  Invalid option. Please enter a number from 1 to 5.\n")
 
 
 if __name__ == "__main__":
