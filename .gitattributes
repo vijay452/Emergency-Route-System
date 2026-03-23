@@ -1,0 +1,6 @@
+# Help GitHub Linguist classify core engine files.
+core/*.cpp linguist-language=C++
+core/*.h linguist-language=C++
+
+# Generated at deploy/build time; exclude from language stats.
+frontend/runtime-config.js linguist-generated=true
