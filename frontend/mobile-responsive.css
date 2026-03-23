@@ -25,7 +25,8 @@
 /* Tablet & Phone (<=768px) */
 @media (max-width: 768px) {
     .container {
-        height: 100dvh;
+        height: auto;
+        min-height: 100dvh;
     }
 
     body {
@@ -67,15 +68,14 @@
         top: 0;
         width: 100%;
         height: auto;
-        max-height: 34dvh;
+        max-height: none;
         z-index: 1;
-        overflow-y: auto;
-        overscroll-behavior: contain;
+        overflow: visible;
         background: white;
         border-right: none;
         border-bottom: 1px solid #ddd;
         display: block;
-        order: 2;
+        order: 1;
     }
 
     .sidebar.active {
@@ -84,15 +84,15 @@
 
     .main-wrapper {
         padding-top: 0;
-        height: calc(100dvh - 122px);
-        overflow: hidden;
+        height: auto;
+        overflow: visible;
     }
 
     .map-container {
-        order: 1;
-        flex: 1;
-        height: auto;
-        min-height: 50dvh;
+        order: 2;
+        flex: none;
+        height: 48vh;
+        min-height: 320px;
     }
 
     .search-section,
@@ -248,7 +248,7 @@
     }
 
     .sidebar {
-        max-height: 36dvh;
+        max-height: none;
     }
 
     .search-section h3,
@@ -257,7 +257,8 @@
     }
 
     .map-container {
-        min-height: 48dvh;
+        height: 44vh;
+        min-height: 280px;
     }
 
     .btn {
@@ -348,12 +349,8 @@
 
 /* Landscape orientation */
 @media (max-width: 768px) and (orientation: landscape) {
-    .sidebar {
-        max-height: 40vh;
-    }
-
     .map-container {
-        height: 60vh;
+        height: 56vh;
     }
 
     .side-panel {
@@ -364,11 +361,7 @@
 /* Portrait orientation */
 @media (max-width: 768px) and (orientation: portrait) {
     .map-container {
-        min-height: 52dvh;
-    }
-
-    .sidebar {
-        max-height: 34dvh;
+        height: 46vh;
     }
 }
 
