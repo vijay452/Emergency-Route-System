@@ -1,7 +1,7 @@
 services:
   - type: web
     name: emergency-route-backend
-    env: node
+    runtime: node
     rootDir: backend
     plan: free
     buildCommand: npm install
@@ -18,11 +18,12 @@ services:
       - key: OPENWEATHER_API_KEY
         sync: false
 
-  - type: static
+  - type: web
     name: emergency-route-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: "sh -c \"echo \\\"window.ERS_API_BASE='${ERS_API_BASE:-}'\\\" > runtime-config.js\""
-    publishPath: .
+    staticPublishPath: .
     autoDeploy: true
     routes:
       - type: rewrite
