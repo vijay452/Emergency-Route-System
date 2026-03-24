@@ -516,7 +516,16 @@ function applyDarkMode() {
                 }
                 
                 body.dark-mode .loader {
-                    background: rgba(0, 0, 0, 0.5);
+                    background: rgba(0, 0, 0, 0.55);
+                }
+
+                body.dark-mode .loader-card {
+                    background: rgba(24, 24, 24, 0.96);
+                    border-color: rgba(255, 255, 255, 0.12);
+                }
+
+                body.dark-mode .loader p {
+                    color: #f2f2f2;
                 }
                 
                 body.dark-mode .navbar {

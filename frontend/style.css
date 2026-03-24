@@ -787,22 +787,41 @@ html, body {
 .loader {
     display: none;
     position: fixed;
-    top: 50%;
-    left: 190px;
-    transform: translate(-50%, -50%);
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
     text-align: center;
     z-index: 1000;
-    background: white;
-    padding: 40px;
+    background: rgba(10, 18, 32, 0.24);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+.loader-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 290px;
+    max-width: min(86vw, 360px);
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(23, 44, 84, 0.12);
     border-radius: 16px;
-    box-shadow: var(--shadow-xl);
-    animation: slideUp 0.3s ease-out;
+    box-shadow: 0 14px 40px rgba(10, 24, 56, 0.22);
+    padding: 30px 24px;
+    animation: slideUp 0.24s ease-out;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translate(-50%, -40%);
+        transform: translate(-50%, -44%);
     }
     to {
         opacity: 1;
@@ -838,7 +857,7 @@ html, body {
     font-size: 14px;
     color: var(--text-dark);
     margin: 0;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Map Controls */
