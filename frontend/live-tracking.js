@@ -7,6 +7,7 @@ let liveTrackingActive = false;
 let liveLocationMarker = null;
 let currentPositionOnRoute = 0;
 let trackingInterval = null;
+let geolocationWatchId = null;
 let positionHistoryForSpeed = [];
 let isSimulatedTracking = false;
 let simulatedPosition = {
@@ -32,12 +33,14 @@ function startRealLocationTracking(onLocationUpdate) {
         maximumAge: 0
     };
 
-    navigator.geolocation.watchPosition(
+    geolocationWatchId = navigator.geolocation.watchPosition(
         (position) => {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
-            const speed = position.coords.speed || 0;
-            const accuracy = position.coords.accuracy;
+            const reportedSpeedMps = Number.isFinite(position.coords.speed) ? position.coords.speed : null;
+            const accuracy = Number.isFinite(position.coords.accuracy) ? position.coords.accuracy : 100;
+            const timestamp = Number.isFinite(position.timestamp) ? position.timestamp : Date.now();
+            const speedKmh = normalizeLiveSpeed(lat, lng, timestamp, reportedSpeedMps, accuracy);
 
             updateLiveLocationMarker(lat, lng);
             
@@ -45,9 +48,10 @@ function startRealLocationTracking(onLocationUpdate) {
                 onLocationUpdate({
                     lat: lat,
                     lng: lng,
-                    speed: speed,
+                    speedMps: reportedSpeedMps,
+                    speedKmh: speedKmh,
                     accuracy: accuracy,
-                    timestamp: Date.now()
+                    timestamp: timestamp
                 });
             }
 
@@ -69,8 +73,52 @@ function startRealLocationTracking(onLocationUpdate) {
     );
 
     liveTrackingActive = true;
+    positionHistoryForSpeed = [];
     showNotification('📍 Live tracking started!');
     return true;
+}
+
+function normalizeLiveSpeed(lat, lng, timestamp, reportedSpeedMps, accuracyMeters) {
+    const historyPoint = {
+        lat: lat,
+        lng: lng,
+        timestamp: timestamp
+    };
+
+    let speedKmh = Number.isFinite(reportedSpeedMps)
+        ? Math.max(0, reportedSpeedMps * 3.6)
+        : 0;
+
+    const previousPoint = positionHistoryForSpeed[positionHistoryForSpeed.length - 1];
+    if (previousPoint) {
+        const dtSeconds = (timestamp - previousPoint.timestamp) / 1000;
+        if (dtSeconds > 0.2) {
+            const distanceKm = calculateDistance(previousPoint.lat, previousPoint.lng, lat, lng);
+            const distanceMeters = distanceKm * 1000;
+            const derivedSpeedKmh = (distanceMeters / dtSeconds) * 3.6;
+
+            // If GPS displacement is within expected jitter range, treat as stationary.
+            const jitterThresholdMeters = Math.max(8, accuracyMeters * 0.35);
+            if (distanceMeters <= jitterThresholdMeters) {
+                speedKmh = 0;
+            } else if (!Number.isFinite(reportedSpeedMps)) {
+                speedKmh = derivedSpeedKmh;
+            }
+        }
+    }
+
+    // Additional smoothing to avoid false speed spikes when user is steady.
+    const minMovingSpeed = accuracyMeters > 25 ? 6 : 2;
+    if (speedKmh < minMovingSpeed || (accuracyMeters > 60 && !Number.isFinite(reportedSpeedMps))) {
+        speedKmh = 0;
+    }
+
+    positionHistoryForSpeed.push(historyPoint);
+    if (positionHistoryForSpeed.length > 6) {
+        positionHistoryForSpeed.shift();
+    }
+
+    return Math.min(speedKmh, 140);
 }
 
 function updateLiveLocationMarker(lat, lng) {
@@ -165,7 +213,12 @@ function simulateNextPosition() {
 
     // Update marker and UI
     updateLiveLocationMarker(simulatedPosition.lat, simulatedPosition.lng);
-    updateLiveTrackingUI(simulatedPosition.lat, simulatedPosition.lng);
+    const simulatedSpeedKmh = 36 + Math.random() * 14;
+    updateLiveTrackingUI(simulatedPosition.lat, simulatedPosition.lng, {
+        speedKmh: simulatedSpeedKmh,
+        accuracy: 999,
+        timestamp: Date.now()
+    });
     
     // Check traffic at current location
     checkTrafficAtLocation(simulatedPosition.lat, simulatedPosition.lng);
@@ -175,7 +228,7 @@ function simulateNextPosition() {
 // 3. LIVE TRACKING UI UPDATES
 // ============================================
 
-function updateLiveTrackingUI(lat, lng) {
+function updateLiveTrackingUI(lat, lng, telemetry = {}) {
     let trackingPanel = document.getElementById('live-tracking-panel');
     
     if (!trackingPanel) {
@@ -198,9 +251,11 @@ function updateLiveTrackingUI(lat, lng) {
         document.body.appendChild(trackingPanel);
     }
 
-    const speed = (Math.random() * 60 + 20).toFixed(1);
+    const currentSpeedKmh = Number.isFinite(telemetry.speedKmh) ? telemetry.speedKmh : 0;
+    const speed = currentSpeedKmh.toFixed(1);
     const distanceRemaining = calculateDistance(lat, lng, currentRoute.endCoord.lat, currentRoute.endCoord.lng);
-    const timeRemaining = (distanceRemaining / (speed || 40) * 60).toFixed(1);
+    const effectiveSpeed = currentSpeedKmh > 0 ? currentSpeedKmh : 30;
+    const timeRemaining = (distanceRemaining / effectiveSpeed * 60).toFixed(1);
     const accuracy = isSimulatedTracking ? 'Simulated' : 'High';
 
     trackingPanel.innerHTML = `
@@ -402,6 +457,13 @@ function stopLiveTracking() {
         clearInterval(trackingInterval);
     }
 
+    if (geolocationWatchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(geolocationWatchId);
+        geolocationWatchId = null;
+    }
+
+    positionHistoryForSpeed = [];
+
     if (liveLocationMarker) {
         window.map.removeLayer(liveLocationMarker);
         liveLocationMarker = null;
@@ -444,7 +506,7 @@ function startLiveTrackingFromRoute() {
 
     // Try real geolocation first, fallback to simulated
     const realLocationStarted = startRealLocationTracking((location) => {
-        updateLiveTrackingUI(location.lat, location.lng);
+        updateLiveTrackingUI(location.lat, location.lng, location);
         checkTrafficAtLocation(location.lat, location.lng);
     });
 
