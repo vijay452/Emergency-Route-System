@@ -1423,7 +1423,17 @@ function clearRoute() {
 function showLoader() {
     try {
         const loader = document.getElementById('loader');
-        if (loader) loader.style.display = 'block';
+        if (loader) {
+            loader.style.display = 'block';
+            loader.style.position = 'fixed';
+            loader.style.inset = '0';
+            loader.style.width = '100vw';
+            loader.style.height = '100dvh';
+            loader.style.background = 'rgba(10, 18, 32, 0.24)';
+            loader.style.backdropFilter = 'blur(4px)';
+            loader.style.webkitBackdropFilter = 'blur(4px)';
+            loader.style.zIndex = '3000';
+        }
     } catch (error) {
         console.warn('Error showing loader:', error);
     }
@@ -1432,7 +1442,9 @@ function showLoader() {
 function hideLoader() {
     try {
         const loader = document.getElementById('loader');
-        if (loader) loader.style.display = 'none';
+        if (loader) {
+            loader.style.display = 'none';
+        }
     } catch (error) {
         console.warn('Error hiding loader:', error);
     }
