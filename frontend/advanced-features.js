@@ -271,17 +271,34 @@ const suggestedLocations = [
     'Rajpur Road, Dehradun'
 ];
 
+function removeLocationSuggestions(inputId) {
+    const selector = inputId
+        ? `.location-suggestion-box[data-input-id="${inputId}"]`
+        : '.location-suggestion-box';
+
+    document.querySelectorAll(selector).forEach(box => box.remove());
+}
+
 function displayLocationSuggestions(inputId) {
     const input = document.getElementById(inputId);
-    if (!input || input.value.length < 2) return;
+    if (!input || input.value.length < 2) {
+        removeLocationSuggestions(inputId);
+        return;
+    }
+
+    removeLocationSuggestions(inputId);
     
     const suggestions = suggestedLocations.filter(loc => 
         loc.toLowerCase().includes(input.value.toLowerCase())
     );
     
-    if (suggestions.length === 0) return;
+    if (suggestions.length === 0) {
+        return;
+    }
     
     const suggestionBox = document.createElement('div');
+    suggestionBox.className = 'location-suggestion-box';
+    suggestionBox.dataset.inputId = inputId;
     suggestionBox.style.cssText = `
         position: absolute;
         top: 100%;
@@ -313,16 +330,23 @@ function displayLocationSuggestions(inputId) {
     input.parentElement.appendChild(suggestionBox);
     
     setTimeout(() => {
-        if (!input.value.includes(suggestions[0]?.charAt(0))) {
+        if (!document.body.contains(suggestionBox)) {
+            return;
+        }
+
+        if (document.activeElement !== input) {
             suggestionBox.remove();
         }
     }, 3000);
 }
 
 function selectSuggestion(inputId, value) {
-    document.getElementById(inputId).value = value;
-    const suggestionBox = document.querySelector('[style*="position: absolute"]');
-    if (suggestionBox) suggestionBox.remove();
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.value = value;
+    removeLocationSuggestions(inputId);
+    input.blur();
 }
 
 // ============================================
@@ -557,11 +581,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (fromInput) {
             fromInput.addEventListener('input', () => displayLocationSuggestions('location-from'));
+            fromInput.addEventListener('blur', () => setTimeout(() => removeLocationSuggestions('location-from'), 150));
         }
         if (toInput) {
             toInput.addEventListener('input', () => displayLocationSuggestions('location-to'));
+            toInput.addEventListener('blur', () => setTimeout(() => removeLocationSuggestions('location-to'), 150));
         }
     }, 500);
+});
+
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('.input-group')) {
+        removeLocationSuggestions();
+    }
 });
 
 // Export functions

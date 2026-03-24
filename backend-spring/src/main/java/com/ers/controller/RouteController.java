@@ -1,6 +1,7 @@
 package com.ers.controller;
 
 import com.ers.model.CityNode;
+import com.ers.repository.CityEdgeRepository;
 import com.ers.repository.CityNodeRepository;
 import com.ers.service.DataSyncService;
 import com.ers.service.RouteEngineService;
@@ -19,11 +20,13 @@ public class RouteController {
     private static final Logger log = LoggerFactory.getLogger(RouteController.class);
 
     private final CityNodeRepository nodeRepository;
+    private final CityEdgeRepository edgeRepository;
     private final RouteEngineService routeEngineService;
     private final DataSyncService syncService;
 
-    public RouteController(CityNodeRepository nodeRepository, RouteEngineService routeEngineService, DataSyncService syncService) {
+    public RouteController(CityNodeRepository nodeRepository, CityEdgeRepository edgeRepository, RouteEngineService routeEngineService, DataSyncService syncService) {
         this.nodeRepository = nodeRepository;
+        this.edgeRepository = edgeRepository;
         this.routeEngineService = routeEngineService;
         this.syncService = syncService;
     }
@@ -31,6 +34,14 @@ public class RouteController {
     @GetMapping("/routes")
     public ResponseEntity<List<CityNode>> getAvailableRoutes() {
         return ResponseEntity.ok(nodeRepository.findAll());
+    }
+
+    @GetMapping("/graph")
+    public ResponseEntity<Map<String, Object>> getGraphSnapshot() {
+        return ResponseEntity.ok(Map.of(
+                "nodes", nodeRepository.findAll(),
+                "edges", edgeRepository.findAll()
+        ));
     }
 
     @PostMapping("/route")

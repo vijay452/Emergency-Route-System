@@ -29,6 +29,8 @@ let mapSelectionMode = null;
 let userLocationMarker = null;
 let userLocationAccuracyCircle = null;
 let locationWatchId = null;
+let graphSnapshotPromise = null;
+let latestStoredTrafficIncidents = [];
 
 const dehradunBounds = {
     west: 77.90,
@@ -277,7 +279,7 @@ async function findRoute() {
         };
 
         if (greenCorridorEnabled && allRoutes.length > 1) {
-            selectedRouteIndex = selectBestEmergencyRouteIndex(allRoutes, latestLiveIncidents);
+            selectedRouteIndex = selectBestEmergencyRouteIndex(allRoutes, getActiveTrafficIncidents());
         }
 
         const primary = allRoutes[selectedRouteIndex];
@@ -291,6 +293,13 @@ async function findRoute() {
             console.log('Successfully stored route calculation in MongoDB.');
         } catch (dbError) {
             console.error('Failed to save route calculation:', dbError);
+        }
+
+        try {
+            await persistRouteTrafficData(primary, { corridorState: signalOverrideActive ? 'green' : 'planned' });
+            console.log('Successfully stored traffic profile in MongoDB.');
+        } catch (trafficError) {
+            console.error('Failed to save traffic profile:', trafficError);
         }
 
         // Track analytics
@@ -951,6 +960,300 @@ function haversineKm(lat1, lng1, lat2, lng2) {
     return R * c;
 }
 
+function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+function getActiveTrafficIncidents() {
+    return [...(latestStoredTrafficIncidents || []), ...(latestLiveIncidents || [])];
+}
+
+async function fetchGraphSnapshot() {
+    if (graphSnapshotPromise) {
+        return graphSnapshotPromise;
+    }
+
+    graphSnapshotPromise = (async () => {
+        const apiBase = await discoverApiBaseUrl();
+        const response = await fetch(`${apiBase}/api/graph`);
+
+        if (!response.ok) {
+            throw new Error(`Graph snapshot failed (${response.status})`);
+        }
+
+        const payload = await response.json();
+        return {
+            nodes: Array.isArray(payload.nodes) ? payload.nodes : [],
+            edges: Array.isArray(payload.edges) ? payload.edges : []
+        };
+    })();
+
+    try {
+        return await graphSnapshotPromise;
+    } catch (error) {
+        graphSnapshotPromise = null;
+        throw error;
+    }
+}
+
+function buildNodeIndex(nodes) {
+    const index = new Map();
+
+    (nodes || []).forEach((node) => {
+        const nodeId = Number(node?.nodeId);
+        if (Number.isFinite(nodeId)) {
+            index.set(nodeId, node);
+        }
+    });
+
+    return index;
+}
+
+function sampleRoutePoints(routeGeometry) {
+    if (!Array.isArray(routeGeometry) || routeGeometry.length === 0) return [];
+
+    const stride = Math.max(1, Math.floor(routeGeometry.length / 24));
+    const samples = [];
+
+    for (let i = 0; i < routeGeometry.length; i += stride) {
+        samples.push(routeGeometry[i]);
+    }
+
+    const lastPoint = routeGeometry[routeGeometry.length - 1];
+    if (samples[samples.length - 1] !== lastPoint) {
+        samples.push(lastPoint);
+    }
+
+    return samples;
+}
+
+function matchGraphEdgesToRoute(route, graph) {
+    if (!route || !Array.isArray(route.routeGeometry) || route.routeGeometry.length === 0) return [];
+
+    const nodeIndex = buildNodeIndex(graph?.nodes);
+    const routePoints = sampleRoutePoints(route.routeGeometry);
+    const rankedEdges = [];
+
+    (graph?.edges || []).forEach((edge) => {
+        const fromNode = nodeIndex.get(Number(edge.fromNode));
+        const toNode = nodeIndex.get(Number(edge.toNode));
+
+        if (!fromNode || !toNode) return;
+
+        const midpointLat = (Number(fromNode.lat) + Number(toNode.lat)) / 2;
+        const midpointLng = (Number(fromNode.lon) + Number(toNode.lon)) / 2;
+        let bestDistance = Number.POSITIVE_INFINITY;
+
+        routePoints.forEach(([lat, lng]) => {
+            const distance = haversineKm(lat, lng, midpointLat, midpointLng);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+            }
+        });
+
+        rankedEdges.push({ edge, score: bestDistance });
+    });
+
+    rankedEdges.sort((a, b) => a.score - b.score);
+
+    const closeMatches = rankedEdges.filter((entry) => entry.score <= 2.5).slice(0, 6);
+    const selected = closeMatches.length > 0 ? closeMatches : rankedEdges.slice(0, 4);
+    return selected.map((entry) => entry.edge);
+}
+
+function getTrafficStatusBySpeed(speedKmh) {
+    const category = getTrafficCategoryBySpeed(speedKmh);
+    if (category === 'heavy') return 'HEAVY_TRAFFIC';
+    if (category === 'moderate') return 'MODERATE_TRAFFIC';
+    return 'SMOOTH_TRAFFIC';
+}
+
+function getTrafficSeverity(entry) {
+    const status = String(entry?.status || '').toUpperCase();
+
+    if (status.includes('BLOCK') || status.includes('HEAVY')) return 'critical';
+    if (status.includes('MODERATE')) return 'moderate';
+    if (status.includes('GREEN') || status.includes('SMOOTH')) return 'smooth';
+
+    const speedMultiplier = Number(entry?.speedMultiplier);
+    if (Number.isFinite(speedMultiplier)) {
+        if (speedMultiplier < 0.6) return 'critical';
+        if (speedMultiplier < 0.85) return 'moderate';
+    }
+
+    return 'smooth';
+}
+
+function buildStoredTrafficDescription(entry, fromNode, toNode) {
+    const labels = [fromNode?.name, toNode?.name].filter(Boolean).join(' to ') || 'Road segment';
+    const status = String(entry?.status || 'TRAFFIC').replace(/_/g, ' ').trim();
+    return `${status} on ${labels}`;
+}
+
+function buildStoredTrafficIncidents(records, graph) {
+    const nodeIndex = buildNodeIndex(graph?.nodes);
+
+    return (records || [])
+        .map((entry, idx) => {
+            const fromNode = nodeIndex.get(Number(entry.fromNode));
+            const toNode = nodeIndex.get(Number(entry.toNode));
+
+            if (!fromNode || !toNode) return null;
+
+            const lat = (Number(fromNode.lat) + Number(toNode.lat)) / 2;
+            const lng = (Number(fromNode.lon) + Number(toNode.lon)) / 2;
+            const speedMultiplier = clamp(Number(entry.speedMultiplier) || 1, 0.3, 1);
+
+            return {
+                id: entry.id || `stored-${idx}`,
+                source: 'mongo',
+                severity: getTrafficSeverity(entry),
+                description: buildStoredTrafficDescription(entry, fromNode, toNode),
+                from: fromNode.name || `Node ${entry.fromNode}`,
+                to: toNode.name || `Node ${entry.toNode}`,
+                lat,
+                lng,
+                delaySeconds: Math.max(0, Math.round((1 - speedMultiplier) * 900)),
+                status: entry.status || 'TRAFFIC',
+                fetchedAt: new Date().toISOString()
+            };
+        })
+        .filter(Boolean);
+}
+
+async function fetchStoredTrafficIncidents() {
+    const apiBase = await discoverApiBaseUrl();
+    const [graph, response] = await Promise.all([
+        fetchGraphSnapshot(),
+        fetch(`${apiBase}/api/traffic`)
+    ]);
+
+    if (!response.ok) {
+        throw new Error(`Stored traffic fetch failed (${response.status})`);
+    }
+
+    const records = await response.json();
+    return buildStoredTrafficIncidents(records, graph);
+}
+
+function mergeTrafficIncidents(storedIncidents, liveIncidents) {
+    const merged = [];
+    const seen = new Set();
+
+    [...(storedIncidents || []), ...(liveIncidents || [])].forEach((incident, index) => {
+        const key = incident.id || `${incident.source || 'traffic'}-${incident.from || ''}-${incident.to || ''}-${index}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        merged.push(incident);
+    });
+
+    return merged;
+}
+
+function getNearestStepStats(route, lat, lng) {
+    if (!route || !Array.isArray(route.steps) || route.steps.length === 0) return null;
+
+    let bestStep = null;
+    let bestDistance = Number.POSITIVE_INFINITY;
+
+    route.steps.forEach((step) => {
+        if (!Number.isFinite(step.lat) || !Number.isFinite(step.lng)) return;
+
+        const distance = haversineKm(lat, lng, step.lat, step.lng);
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            bestStep = step;
+        }
+    });
+
+    if (!bestStep) return null;
+
+    const speedKmh = bestStep.durationMin > 0
+        ? bestStep.distanceKm / (bestStep.durationMin / 60)
+        : NaN;
+
+    return {
+        step: bestStep,
+        distanceKm: bestDistance,
+        speedKmh
+    };
+}
+
+function buildTrafficRecordForEdge(edge, nodeIndex, route, corridorState) {
+    const fromNode = nodeIndex.get(Number(edge.fromNode));
+    const toNode = nodeIndex.get(Number(edge.toNode));
+
+    if (!fromNode || !toNode) return null;
+
+    const midpointLat = (Number(fromNode.lat) + Number(toNode.lat)) / 2;
+    const midpointLng = (Number(fromNode.lon) + Number(toNode.lon)) / 2;
+    const nearest = getNearestStepStats(route, midpointLat, midpointLng);
+
+    if (!nearest || !Number.isFinite(nearest.speedKmh)) return null;
+
+    let speedMultiplier = clamp(nearest.speedKmh / 42, 0.35, 1);
+    let status = getTrafficStatusBySpeed(nearest.speedKmh);
+    const nearbyIncident = incidentNearPoint(midpointLat, midpointLng, getActiveTrafficIncidents());
+
+    if (nearbyIncident) {
+        if (nearbyIncident.severity === 'critical') {
+            speedMultiplier = Math.min(speedMultiplier, 0.5);
+            status = 'HEAVY_TRAFFIC';
+        } else if (nearbyIncident.severity === 'moderate') {
+            speedMultiplier = Math.min(speedMultiplier, 0.72);
+            status = 'MODERATE_TRAFFIC';
+        }
+    }
+
+    if (corridorState === 'green') {
+        speedMultiplier = Math.max(speedMultiplier, 0.95);
+        status = 'GREEN_CORRIDOR';
+    } else if (corridorState === 'released') {
+        speedMultiplier = Math.min(1, Math.max(speedMultiplier, 0.82));
+        if (status === 'GREEN_CORRIDOR') {
+            status = 'SMOOTH_TRAFFIC';
+        }
+    }
+
+    return {
+        fromNode: Number(edge.fromNode),
+        toNode: Number(edge.toNode),
+        congestionLevel: Number((1 - speedMultiplier).toFixed(3)),
+        speedMultiplier: Number(speedMultiplier.toFixed(3)),
+        status
+    };
+}
+
+async function persistRouteTrafficData(route, options = {}) {
+    if (!route) return;
+
+    const graph = await fetchGraphSnapshot();
+    const nodeIndex = buildNodeIndex(graph.nodes);
+    const matchedEdges = matchGraphEdgesToRoute(route, graph);
+    const payloads = matchedEdges
+        .map((edge) => buildTrafficRecordForEdge(edge, nodeIndex, route, options.corridorState || 'planned'))
+        .filter(Boolean);
+
+    if (payloads.length === 0) {
+        return;
+    }
+
+    const apiBase = await discoverApiBaseUrl();
+    await Promise.all(payloads.map(async (payload) => {
+        const response = await fetch(`${apiBase}/api/traffic/alert`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Traffic persistence failed (${response.status}): ${await response.text()}`);
+        }
+    }));
+
+    await loadTrafficAlerts();
+}
+
 function routeTrafficRiskScore(route, incidents) {
     if (!route || !Array.isArray(route.routeGeometry) || incidents.length === 0) return 0;
 
@@ -1100,6 +1403,13 @@ function applySignalOverrides() {
     currentSignalPlan = currentSignalPlan.map((item) => ({ ...item, active: true }));
     drawSignalControlPoints(currentSignalPlan);
     renderSignalControlPlan(currentSignalPlan, `Signal overrides applied at ${currentSignalPlan.length} junctions. Emergency corridor is now GREEN.`);
+
+    const activeRoute = currentRoute?.routes?.[selectedRouteIndex];
+    if (activeRoute) {
+        persistRouteTrafficData(activeRoute, { corridorState: 'green' }).catch((error) => {
+            console.error('Failed to persist green corridor traffic data:', error);
+        });
+    }
 }
 
 function releaseSignalOverrides() {
@@ -1112,6 +1422,13 @@ function releaseSignalOverrides() {
     currentSignalPlan = currentSignalPlan.map((item) => ({ ...item, active: false }));
     drawSignalControlPoints(currentSignalPlan);
     renderSignalControlPlan(currentSignalPlan, 'Corridor released. Signals returned to normal cycle (simulation).');
+
+    const activeRoute = currentRoute?.routes?.[selectedRouteIndex];
+    if (activeRoute) {
+        persistRouteTrafficData(activeRoute, { corridorState: 'released' }).catch((error) => {
+            console.error('Failed to persist released corridor traffic data:', error);
+        });
+    }
 }
 
 function updateSignalControlForRoute(route) {
@@ -1123,7 +1440,7 @@ function updateSignalControlForRoute(route) {
         return;
     }
 
-    const incidents = latestLiveIncidents || [];
+    const incidents = getActiveTrafficIncidents();
     const plan = buildSignalControlPlan(route, incidents).map((item) => ({ ...item, active: signalOverrideActive }));
     currentSignalPlan = plan;
     drawSignalControlPoints(currentSignalPlan);
@@ -1140,7 +1457,7 @@ function updateSignalControlForRoute(route) {
 function applyGreenCorridorToCurrentRoute() {
     if (!currentRoute || !Array.isArray(currentRoute.routes) || currentRoute.routes.length === 0) return;
 
-    selectedRouteIndex = selectBestEmergencyRouteIndex(currentRoute.routes, latestLiveIncidents || []);
+    selectedRouteIndex = selectBestEmergencyRouteIndex(currentRoute.routes, getActiveTrafficIncidents());
     const optimizedRoute = currentRoute.routes[selectedRouteIndex];
 
     displayRoute(optimizedRoute, currentRoute.routes);
@@ -1398,40 +1715,55 @@ function getStatusClass(status) {
 
 async function loadTrafficAlerts() {
     try {
-        const liveData = await fetchLiveTrafficData();
-        const incidents = Array.isArray(liveData?.incidents) ? liveData.incidents : [];
-        latestLiveIncidents = incidents;
         const alertsContainer = document.getElementById('traffic-alerts');
-        const fetchedAt = liveData?.fetchedAt ? new Date(liveData.fetchedAt) : new Date();
+        let liveData = null;
+        let liveIncidents = [];
+        let storedIncidents = [];
 
-        // If provider is not configured, show useful estimated alerts instead of setup warnings.
-        if (liveData && liveData.providerConfigured === false) {
-            setTrafficDataMode('estimated', `Mode: Estimated • ${fetchedAt.toLocaleTimeString()}`);
-            renderFallbackTrafficAlerts('Estimated traffic for your selected route.');
-            return;
+        try {
+            storedIncidents = await fetchStoredTrafficIncidents();
+        } catch (storedError) {
+            console.error('Error loading stored traffic alerts:', storedError);
         }
 
-        setTrafficDataMode('live', `Mode: Live • ${fetchedAt.toLocaleTimeString()}`);
+        latestStoredTrafficIncidents = storedIncidents;
+
+        try {
+            liveData = await fetchLiveTrafficData();
+            liveIncidents = Array.isArray(liveData?.incidents) ? liveData.incidents : [];
+        } catch (liveError) {
+            console.error('Error loading live traffic alerts:', liveError);
+        }
+
+        latestLiveIncidents = liveIncidents;
+
+        const incidents = mergeTrafficIncidents(storedIncidents, liveIncidents);
+        const fetchedAt = liveData?.fetchedAt ? new Date(liveData.fetchedAt) : new Date();
+
+        if (liveIncidents.length > 0) {
+            setTrafficDataMode('live', `Mode: Live + MongoDB â€¢ ${fetchedAt.toLocaleTimeString()}`);
+        } else if (storedIncidents.length > 0) {
+            setTrafficDataMode('estimated', `Mode: MongoDB â€¢ ${new Date().toLocaleTimeString()}`);
+        } else if (liveData && liveData.providerConfigured === false) {
+            setTrafficDataMode('estimated', `Mode: Estimated â€¢ ${fetchedAt.toLocaleTimeString()}`);
+        } else {
+            setTrafficDataMode('offline', `Mode: Offline â€¢ ${new Date().toLocaleTimeString()}`);
+        }
 
         if (incidents.length === 0) {
-            alertsContainer.innerHTML = '<div class="alert-empty">No major incidents detected in this map area.</div>';
-            clearLiveTrafficMarkers();
-
-            if (currentRoute && currentRoute.routes && currentRoute.routes[selectedRouteIndex]) {
-                updateSignalControlForRoute(currentRoute.routes[selectedRouteIndex]);
-            }
+            renderFallbackTrafficAlerts('No stored traffic incidents yet. Find a route to generate route-based traffic data.');
             return;
         }
 
         alertsContainer.innerHTML = incidents
             .slice(0, 8)
             .map((incident) => {
-                const delayMin = incident.delaySeconds > 0 ? `${Math.round(incident.delaySeconds / 60)} min delay` : 'Live incident';
+                const delayMin = incident.delaySeconds > 0 ? `${Math.round(incident.delaySeconds / 60)} min delay` : 'Traffic update';
                 const locationLabel = [incident.from, incident.to].filter(Boolean).join(' to ') || 'Road segment';
                 return `
                     <div class="alert-item ${incident.severity}">
                         <strong>${incident.description}</strong>
-                        <br><small>${locationLabel} • ${delayMin}</small>
+                        <br><small>${locationLabel} â€¢ ${delayMin}</small>
                     </div>
                 `;
             })
@@ -1442,11 +1774,14 @@ async function loadTrafficAlerts() {
         if (currentRoute && currentRoute.routes && currentRoute.routes[selectedRouteIndex]) {
             updateSignalControlForRoute(currentRoute.routes[selectedRouteIndex]);
         }
+        return;
+
     } catch (error) {
         console.error('Error loading traffic alerts:', error);
         setTrafficDataMode('offline', `Mode: Offline • ${new Date().toLocaleTimeString()}`);
         renderFallbackTrafficAlerts('Live provider unreachable. Showing estimated route traffic.');
         latestLiveIncidents = [];
+        latestStoredTrafficIncidents = [];
     }
 }
 
