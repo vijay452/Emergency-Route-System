@@ -9,7 +9,7 @@ const markers = {};
 function initializeMap() {
     try {
         // Initialize Leaflet map
-        map = L.map('map').setView([30.2865, 78.0158], 13);
+        map = L.map('map').setView([22.9734, 78.6569], 5);
 
         // Add tile layer (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

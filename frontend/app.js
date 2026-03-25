@@ -30,11 +30,11 @@ let userLocationMarker = null;
 let userLocationAccuracyCircle = null;
 let locationWatchId = null;
 
-const dehradunBounds = {
-    west: 77.90,
-    east: 78.15,
-    north: 30.40,
-    south: 30.20
+const indiaBounds = {
+    west: 68.1,
+    east: 97.4,
+    north: 37.6,
+    south: 6.4
 };
 
 function isMobileViewport() {
@@ -487,15 +487,13 @@ async function geocodePlace(query) {
         query,
         compact,
         aliased,
-        `${aliased}, Dehradun`,
-        `${aliased}, Dehradun, Uttarakhand`,
-        `${compact}, Dehradun`,
-        `${compact}, Uttarakhand, India`
+        `${aliased}, India`,
+        `${compact}, India`
     ]));
 
     const searchUrls = [];
     queryCandidates.forEach((candidate) => {
-        searchUrls.push(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(candidate)}&limit=5&countrycodes=in&viewbox=${dehradunBounds.west},${dehradunBounds.north},${dehradunBounds.east},${dehradunBounds.south}&bounded=1`);
+        searchUrls.push(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(candidate)}&limit=5&countrycodes=in&viewbox=${indiaBounds.west},${indiaBounds.north},${indiaBounds.east},${indiaBounds.south}&bounded=1`);
         searchUrls.push(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(candidate)}&limit=5&countrycodes=in`);
     });
 
@@ -522,8 +520,8 @@ async function geocodePlace(query) {
         .sort((a, b) => {
             const aName = (a.display_name || '').toLowerCase();
             const bName = (b.display_name || '').toLowerCase();
-            const aScore = preferredTokens.reduce((sum, t) => sum + (aName.includes(t) ? 1 : 0), aName.includes('dehradun') ? 2 : 0);
-            const bScore = preferredTokens.reduce((sum, t) => sum + (bName.includes(t) ? 1 : 0), bName.includes('dehradun') ? 2 : 0);
+            const aScore = preferredTokens.reduce((sum, t) => sum + (aName.includes(t) ? 1 : 0), 0);
+            const bScore = preferredTokens.reduce((sum, t) => sum + (bName.includes(t) ? 1 : 0), 0);
             return bScore - aScore;
         })[0] || rows[0];
 
